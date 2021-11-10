@@ -44,11 +44,11 @@ class CommandResult:
 def run(command: [str], environment: {str: str} = None) -> CommandResult:
     """Execute the given command and return an object ready to check its result.
 
-    >>> run(["mkdir", "-p", "/tmp/coliprot"])
-    <CommandResult command="mkdir -p /tmp/coliprot" return_code=0 stdout="" stderr="">
+    >>> run(["mkdir", "-p", "/tmp/aurornis"])
+    <CommandResult command="mkdir -p /tmp/aurornis" return_code=0 stdout="" stderr="">
 
     If the command fails, then the is_successful() method will tell it:
-    >>> c = run(["touch", "/tmp/coliprot/path/in/an/inexistent/folder.txt"])
+    >>> c = run(["touch", "/tmp/aurornis/path/in/an/inexistent/folder.txt"])
     >>> c.is_successful()
     False
 
@@ -56,12 +56,12 @@ def run(command: [str], environment: {str: str} = None) -> CommandResult:
     >>> c.stdout
     ''
     >>> c.stderr
-    "touch: cannot touch '/tmp/coliprot/path/in/an/inexistent/folder.txt': No such file or directory\\n"
+    "touch: cannot touch '/tmp/aurornis/path/in/an/inexistent/folder.txt': No such file or directory\\n"
 
     By default, the command runs without any environment variable. You can set them with the second argument:
-    >>> c = run(["touch", "/tmp/coliprot/path/in/an/inexistent/folder.txt"], environment={"LANG": "fr_FR.utf8"})
+    >>> c = run(["touch", "/tmp/aurornis/path/in/an/inexistent/folder.txt"], environment={"LANG": "fr_FR.utf8"})
     >>> c.stderr
-    "touch: impossible de faire un touch '/tmp/coliprot/path/in/an/inexistent/folder.txt': Aucun fichier ou dossier de ce type\\n"
+    "touch: impossible de faire un touch '/tmp/aurornis/path/in/an/inexistent/folder.txt': Aucun fichier ou dossier de ce type\\n"
     """
     environ.clear()
 

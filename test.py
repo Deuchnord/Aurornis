@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import doctest
-
-import coliprot
+import aurornis
 
 
 if __name__ == "__main__":
-    (f, t) = doctest.testmod(coliprot)
+    (f, t) = doctest.testmod(aurornis)
     failures = f
     tests = t
 
