@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="aurornis",
-    version="v1.0.1",
+    version="v1.0.2",
     packages=["aurornis"],
     scripts=[],
     url="https://github.com/Deuchnord/Aurornis",
