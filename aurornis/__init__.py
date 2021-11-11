@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import subprocess
-from os import environ
 
 
 class CommandResult:
@@ -63,8 +62,6 @@ def run(command: [str], environment: {str: str} = None) -> CommandResult:
     >>> c.stderr
     "touch: impossible de faire un touch '/tmp/aurornis/path/in/an/inexistent/folder.txt': Aucun fichier ou dossier de ce type\\n"
     """
-    environ.clear()
-
     process = subprocess.run(command, capture_output=True, check=False, env=environment)
     return CommandResult(
         command, process.returncode, process.stdout.decode(), process.stderr.decode()
