@@ -28,7 +28,7 @@ command_result = aurornis.run(["ls", "-la", "/"])
 # <CommandResult command="ls -la /" return_code=0 stdout="total 68 ..." stderr="">
 ```
 
-For better security and reproducibility, the environment variables of your system are not reproduced (except `$PATH`).
+For better security and reproducibility, the environment variables of your system are not reproduced.
 
 If you need to specify environment variables before you run the command, add them to the `run` function:
 
@@ -38,9 +38,9 @@ import aurornis
 command_result = aurornis.run(["ls", "-l", "$HOME"], environment={"HOME": "/home/deuchnord"})
 ```
 
-By default, the `LANG` value (used for internationalization) is reset to `C` (default system language, commonly English). You can change it if you want another language of execution.
+By default, the `LANG` environment variable (used for internationalization) is reset to `C` (default system language, commonly English). You can change it if you want another language of execution.
 
-Once you get the result, all you need to do is to use your favorite unit test framework to check it worked as expected:
+Once you get the result, all you need to do is to use your favorite unit test framework to check it returned what you expected it to return:
 
 ```python
 import aurornis
@@ -64,3 +64,17 @@ drwxr-xr-x 1 deuchnord deuchnord 40 11 Jun  2020 Music
 drwxr-xr-x 1 deuchnord deuchnord 40 10 Nov 11:32 Videos""", command_result.stdout)
         self.assertEqual("", command_result.stderr)
 ```
+
+## FAQ/Troubleshooting
+
+### My tests fail in virtual environments
+
+If you are using Aurornis in a virtual environment, you will need to add the path of its `bin` folder in the environment variable:
+
+```python
+import aurornis
+
+aurornis.run(["python", "my-script.py"], environment={"PATH": "path/to/the/venv/bin"})
+```
+
+Note: if you use Pipenv, you can get this path with `pipenv --venv` and add `/bin` at the end of the returned path.
