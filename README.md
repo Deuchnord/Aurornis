@@ -1,5 +1,7 @@
 # Aurornis - The Command Line Program Test Helper
 
+[![Coverage Status](https://coveralls.io/repos/github/Deuchnord/Aurornis/badge.svg?branch=main)](https://coveralls.io/github/Deuchnord/Aurornis?branch=main)
+
 Aurornis is a small, yet powerful library designed to help testing command line programs.
 The name is a reference to the [_aurornis xui_](https://en.wikipedia.org/wiki/Aurornis), a prehistoric bird that lived 10 millions ago.
 
