@@ -94,6 +94,13 @@ def run(
     >>> c.is_successful()
     False
 
+    You can also check the execution time of your command.
+    The object provides two values to facilitate your tests, one in milliseconds:
+    >>> assert c.exec_time_ms < 500
+
+    and one in microseconds:
+    >>> assert c.exec_time_us < 500000
+
     You can get the text returned to the standard output and error:
     >>> c.stdout
     ''
