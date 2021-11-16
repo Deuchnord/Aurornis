@@ -1,4 +1,4 @@
-name: Tests
+name: Doc Tests
 
 on:
   push:
@@ -13,22 +13,28 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-18.04
-          - ubuntu-20.04
-          - macos-10.15
-          - macos-11.0
-          - windows-2019
+          - ubuntu-latest
         python_version:
           - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
 
-    name: Doc tests (Python ${{ matrix.python_version }} on ${{ matrix.os }})
+    name: Python ${{ matrix.python_version }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
+
     - name: Set up Python ${{ matrix.python_version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python_version }}
         architecture: x64
+
+    - name: Prepare environment
+      run: |
+        python3 -mpip install -U pip pipenv
+        pipenv sync --dev
+
+    - name: Run tests
+      run: |
+        make tests
