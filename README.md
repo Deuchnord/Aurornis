@@ -37,7 +37,7 @@ If you need to specify environment variables before you run the command, add the
 ```python
 import aurornis
 
-command_result = aurornis.run(["ls", "-l", "$HOME"], environment={"HOME": "/home/deuchnord"})
+command_result = aurornis.run(["env"], environment={"HOME": "/home/deuchnord"})
 ```
 
 By default, the `LANG` environment variable (used for internationalization) is reset to `C` (default system language, commonly English). You can change it if you want another language of execution.
@@ -67,6 +67,16 @@ drwxr-xr-x 1 deuchnord deuchnord 40 10 Nov 11:32 Videos""", command_result.stdou
         self.assertEqual("", command_result.stderr)
 ```
 
+If your command returns colors in your standard output or standard error, you can ask Aurornis to automatically remove them:
+
+```python
+import aurornis
+
+aurornis.run(["echo", "-e", r'\e[0;32mHello World!\e[0m'], remove_colors=True)
+```
+
+This option also automatically sets [the standard `NO_COLOR` environment variable](https://no-color.org). If your application shows colors, you may want to handle this environment variable to facilitate their deactivation by end users.
+
 ## FAQ/Troubleshooting
 
 ### My tests fail in virtual environments
@@ -79,4 +89,8 @@ import aurornis
 aurornis.run(["python", "my-script.py"], environment={"PATH": "path/to/the/venv/bin"})
 ```
 
-Note: if you use Pipenv, you can get this path with `pipenv --venv` and add `/bin` at the end of the returned path.
+Note: if you use Pipenv, you can get this path with the following command:
+
+```bash
+echo "$(pipenv --venv)/bin"
+```
