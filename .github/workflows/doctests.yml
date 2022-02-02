@@ -32,16 +32,16 @@ jobs:
 
     - name: Prepare environment
       run: |
-        python3 -mpip install -U pip pipenv
-        pipenv sync --dev
+        python3 -mpip install -U pip poetry
+        poetry install
 
     - name: Run tests (with coverage)
       if: ${{ matrix.python_version == '3.10' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        pipenv run coverage run tests.py
-        pipenv run coveralls --service=github
+        poetry run coverage run tests.py
+        poetry run coveralls --service=github
 
     - name: Run tests (without coverage)
       if: ${{ matrix.python_version != '3.10' }}

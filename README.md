@@ -1,4 +1,4 @@
-# Aurornis - The Command Line Program Test Helper
+# Aurornis - A command line program test helper
 
 [![Coverage Status](https://coveralls.io/repos/github/Deuchnord/Aurornis/badge.svg?branch=main)](https://coveralls.io/github/Deuchnord/Aurornis?branch=main)
 
@@ -13,10 +13,11 @@ Aurornis is available in PyPI, so all you need is to install it with PIP:
 pip install --user aurornis
 ```
 
-If you are using Pipenv, it is recommended to install it as a development dependency:
+If you are using Pipenv or Poetry, it is recommended to install it as a development dependency:
 
 ```bash
 pipenv install --dev aurornis
+poetry add --dev aurornis
 ```
 
 ## Usage

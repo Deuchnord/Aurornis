@@ -1,5 +1,5 @@
 black:
-	pipenv run black .
+	poetry run black .
 
 tests:
-	pipenv run python3 tests.py
+	poetry run python3 tests.py
