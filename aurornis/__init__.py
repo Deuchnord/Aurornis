@@ -82,7 +82,10 @@ class CommandResult:
 
 
 def run(
-    command: [str], environment: {str: str} = None, remove_colors: bool = False
+    command: [str],
+    environment: {str: str} = None,
+    remove_colors: bool = False,
+    stdin: [str] = None,
 ) -> CommandResult:
     """Execute the given command and return an object ready to check its result.
 
@@ -122,6 +125,25 @@ def run(
     When `remove_color` is set to True, the `NO_COLOR` environment variable is defined to tell your command it should not output colors.
     It is recommended to take this environment variable in account, as it is becoming a standard.
     For more information, see https://no-color.org.
+
+    If your command reads the standard input, you can give it with the `stdin` argument.
+    It is a list of strings, which are joined with the end-of-line character ("\n") at execution.
+    Remember that the text written in standard input does not appear in the standard output.
+    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], stdin=["World"])
+    >>> c.is_successful()
+    True
+    >>> c.stdout
+    'Who are you? Hello World!\\n'
+
+    The number of elements given in `stdin` is not verified by Aurornis, it is up to you to verify that the command
+    has the expected behavior.
+    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"])
+    >>> c.is_successful()
+    False
+    >>> c.stdout
+    'Who are you? '
+    >>> c.stderr
+    'Traceback (most recent call last):\\n  File "<string>", line 1, in <module>\\nEOFError: EOF when reading a line\\n'
     """
     if environment is None:
         environment = {"LANG": "C"}
@@ -134,11 +156,26 @@ def run(
         # See: https://no-color.org/
         environment["NO_COLOR"] = "1"
 
-    start_time = datetime.now()
-    process = subprocess.run(command, capture_output=True, check=False, env=environment)
-    exec_time = (datetime.now() - start_time).microseconds
+    if stdin is not None and len(stdin) > 0:
+        input = "\n".join(stdin).encode("utf-8")
+    else:
+        input = None
 
-    stdout, stderr = process.stdout.decode(), process.stderr.decode()
+    start_time = datetime.now()
+
+    process = subprocess.Popen(
+        command,
+        env=environment,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+    )
+    stdout, stderr = process.communicate(input)
+
+    stdout = stdout.decode()
+    stderr = stderr.decode()
+
+    exec_time = (datetime.now() - start_time).microseconds
 
     if remove_colors:
         stdout, stderr = _remove_colors(stdout), _remove_colors(stderr)
