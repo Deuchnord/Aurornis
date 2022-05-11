@@ -89,7 +89,7 @@ def run(
     environment: {str: str} = None,
     remove_colors: bool = False,
     stdin: [str] = None,
-    normalize_carriage_return: bool = False
+    normalize_carriage_return: bool = False,
 ) -> CommandResult:
     """Execute the given command and return an object ready to check its result.
 
@@ -205,7 +205,9 @@ def _remove_colors(from_text: str) -> str:
     return new_str
 
 
-def _get_execution_environment(user_environment: {str: str}, remove_colors: bool) -> {str: str}:
+def _get_execution_environment(
+    user_environment: {str: str}, remove_colors: bool
+) -> {str: str}:
     exec_env = {"LANG": "C"}
 
     if platform == "win32":
