@@ -89,23 +89,27 @@ def run(
     environment: {str: str} = None,
     remove_colors: bool = False,
     stdin: [str] = None,
+    normalize_carriage_return: bool = False
 ) -> CommandResult:
     """Execute the given command and return an object ready to check its result.
 
     >>> run(["mkdir", "-p", "/tmp/aurornis"])
     <CommandResult command="mkdir -p /tmp/aurornis" return_code=0 stdout="" stderr="">
 
+    If you need to run the tests on both UNIX and Windows, it is recommended to set the `normalize_carriage_return` to True.
+    This way, all the "\r\n" in standard output and standard error will be converted to "\n".
+
     If the command returns a non-zero code, the is_successful() method returns false:
-    >>> c = run(["python3", "-c", r"import sys; print('Oops, it didn\\'t work!', file=sys.stderr); exit(1)"])
+    >>> c = run(["python3", "-c", r"import sys; print('Oops, it didn\\'t work!', file=sys.stderr); exit(1)"], normalize_carriage_return=True)
     >>> c.is_successful()
     False
 
     You can also check the execution time of your command.
     The object provides two values to facilitate your tests, one in milliseconds:
-    >>> assert c.exec_time_ms < 500
+    >>> assert c.exec_time_ms < 1000
 
     and one in microseconds:
-    >>> assert c.exec_time_us < 500000
+    >>> assert c.exec_time_us < 1000000
 
     You can get the text returned to the standard output and error:
     >>> c.stdout
@@ -113,15 +117,17 @@ def run(
     >>> c.stderr
     "Oops, it didn't work!\\n"
 
-    By default, the command runs without any environment variable. You can set them with the second argument:
-    >>> c = run(["env"], environment={"MY_VERY_COOL_ENV_VARIABLE": "Hello World!"})
-    >>> print(c.stdout)
-    LANG=C
-    MY_VERY_COOL_ENV_VARIABLE=Hello World!
-    <BLANKLINE>
+    By default, the command runs with the minimum environment variable required by the operating system (e.g. $PATH on UNIX).
+    You can set new ones or overwrite the existing ones with the `environment` argument:
+    >>> c = run(["env"], environment={"MY_VERY_COOL_ENV_VARIABLE": "Hello World!"}, normalize_carriage_return=True)
+    >>> data = dict(entry.split("=") for entry in c.stdout.strip().split("\\n"))
+    >>> data.get("LANG")
+    'C'
+    >>> data.get("MY_VERY_COOL_ENV_VARIABLE")
+    'Hello World!'
 
     If the command returns colors, you can ask Aurornis to remove them automatically.
-    >>> c = run(["python3", "-c", "print('\33[0;32mHello World!\33[0m')"], remove_colors=True)
+    >>> c = run(["python3", "-c", "print('\33[0;32mHello World!\33[0m')"], remove_colors=True, normalize_carriage_return=True)
     >>> c.stdout
     'Hello World!\\n'
 
@@ -132,7 +138,7 @@ def run(
     If your command reads the standard input, you can give it with the `stdin` argument.
     It is a list of strings, which are joined with the end-of-line character ("\n") at execution.
     Remember that the text written in standard input does not appear in the standard output.
-    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], stdin=["World"])
+    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], stdin=["World"], normalize_carriage_return=True)
     >>> c.is_successful()
     True
     >>> c.stdout
@@ -140,7 +146,7 @@ def run(
 
     The number of elements given in `stdin` is not verified by Aurornis, it is up to you to verify that the command
     has the expected behavior.
-    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"])
+    >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], normalize_carriage_return=True)
     >>> c.is_successful()
     False
     >>> c.stdout
@@ -166,6 +172,10 @@ def run(
 
     stdout = stdout.decode()
     stderr = stderr.decode()
+
+    if normalize_carriage_return:
+        stdout = stdout.replace("\r\n", "\n")
+        stderr = stderr.replace("\r\n", "\n")
 
     exec_time = (datetime.now() - start_time).microseconds
 
