@@ -210,6 +210,8 @@ def _get_execution_environment(user_environment: {str: str}, remove_colors: bool
 
     if platform == "win32":
         exec_env["SystemRoot"] = environ.get("SystemRoot")
+    else:
+        exec_env["PATH"] = environ.get("PATH")
 
     if user_environment is not None:
         for key in user_environment:
