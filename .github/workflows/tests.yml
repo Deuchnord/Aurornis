@@ -1,10 +1,10 @@
-name: Doc Tests
+name: Tests
 
 on:
   push:
-    branches: [main, features]
+    branches: [main]
   pull_request:
-    branches: [main, features]
+    branches: [main]
 
 jobs:
   doc-tests:
@@ -14,13 +14,15 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+          - macos-latest
+          - windows-latest
         python_version:
           - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
 
-    name: Python ${{ matrix.python_version }}
+    name: Python ${{ matrix.python_version }} on ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
 
@@ -36,7 +38,7 @@ jobs:
         poetry install
 
     - name: Run tests (with coverage)
-      if: ${{ matrix.python_version == '3.10' }}
+      if: ${{ matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -44,6 +46,6 @@ jobs:
         poetry run coveralls --service=github
 
     - name: Run tests (without coverage)
-      if: ${{ matrix.python_version != '3.10' }}
+      if: ${{ matrix.os != 'ubuntu-latest' || matrix.python_version != '3.10' }}
       run: |
         make tests
