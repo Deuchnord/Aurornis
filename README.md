@@ -20,7 +20,18 @@ pipenv install --dev aurornis
 poetry add --dev aurornis
 ```
 
-## Usage
+**Important note:** this library has not been tested on a production environment. For security reasons, it recommended to use it for development tests only.
+This might evolve in the future.
+
+## Main features
+
+- One simple function: give it the command, and it will take care of all the complexity for you
+- Supports the standard input, output and error
+- Computes the execution time of the command, so you can test its global performance directly
+- Provides a way to clean the colors to make testing simpler (with native support of the [`NO_COLOR` standard](https://no-color.org/))
+- Supports Linux, macOS and Windows. Probably also works on FreeBSD.
+
+## Basic usage
 
 Aurornis provides a package with only one function to run a command, that returns an object with the result of the command:
 
@@ -31,9 +42,9 @@ command_result = aurornis.run(["ls", "-la", "/"])
 # <CommandResult command="ls -la /" return_code=0 stdout="total 68 ..." stderr="">
 ```
 
-For better security and reproducibility, the environment variables of your system are not reproduced.
+For better security and reproducibility, the environment variables of your system are not reproduced, with the exception of `$PATH` on UNIX and `SystemRoot` on Windows.
 
-If you need to specify environment variables before you run the command, add them to the `run` function:
+If you need to specify environment variables (or even overwrite some of them) before you run the command, add them to the `run` function:
 
 ```python
 import aurornis
@@ -41,7 +52,7 @@ import aurornis
 command_result = aurornis.run(["env"], environment={"HOME": "/home/deuchnord"})
 ```
 
-By default, the `LANG` environment variable (used for internationalization) is reset to `C` (default system language, commonly English). You can change it if you want another language of execution.
+By default, the `LANG` environment variable (used for internationalization) is reset to `C` (default system language, commonly English). You can change it if you want to test with another locale.
 
 Once you get the result, all you need to do is to use your favorite unit test framework to check it returned what you expected it to return:
 
@@ -80,18 +91,8 @@ This option also automatically sets [the standard `NO_COLOR` environment variabl
 
 ## FAQ/Troubleshooting
 
-### My tests fail in virtual environments
+### How to handle correctly the return lines when my tests are executed on both Windows and non-Windows systems? 
 
-If you are using Aurornis in a virtual environment, you will need to add the path of its `bin` folder in the environment variable:
+Since version 1.4, the `run()` function provides a way to handle it for you. To activate it, set the `normalize_carriage_return` argument to `True`.
 
-```python
-import aurornis
-
-aurornis.run(["python", "my-script.py"], environment={"PATH": "path/to/the/venv/bin"})
-```
-
-Note: if you use Pipenv, you can get this path with the following command:
-
-```bash
-echo "$(pipenv --venv)/bin"
-```
+If you use a previous version, you can reproduce this behavior easily by replacing the `\r\n` characters with `\n` on both `stdout` and `stderr`.
