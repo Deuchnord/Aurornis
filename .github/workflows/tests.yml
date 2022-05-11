@@ -37,15 +37,39 @@ jobs:
         python3 -mpip install -U pip poetry
         poetry install
 
-    - name: Run tests (with coverage)
-      if: ${{ matrix.os == 'ubuntu-latest' && matrix.python_version == '3.10' }}
+    - name: Run tests
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         poetry run coverage run tests.py
-        poetry run coveralls --service=github
 
-    - name: Run tests (without coverage)
-      if: ${{ matrix.os != 'ubuntu-latest' || matrix.python_version != '3.10' }}
+    - name: Analyze coverage
       run: |
-        make tests
+        poetry run coveralls --service=github
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_PARALLEL: true
+        COVERALLS_FLAG_NAME: "Py${{ matrix.python_version }}_${{ matrix.os }}"
+
+  coverage:
+    name: Push coverage report
+    needs: doc-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install -U pip poetry
+          poetry install
+
+      - name: Upload coverage report
+        run: |
+          poetry run coveralls --finish --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
