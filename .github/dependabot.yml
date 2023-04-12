@@ -5,8 +5,9 @@
 
 version: 2
 updates:
-  - package-ecosystem: "pip" # See documentation for possible values
+  - package-ecosystem: "pip"
     directory: "/" # Location of package manifests
+    target-branch: main
     open-pull-requests-limit: 5
     schedule:
       interval: "daily"
