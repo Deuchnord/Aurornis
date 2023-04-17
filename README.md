@@ -93,6 +93,6 @@ This option also automatically sets [the standard `NO_COLOR` environment variabl
 
 ### How to handle correctly the return lines when my tests are executed on both Windows and non-Windows systems? 
 
-Since version 1.4, the `run()` function provides a way to handle it for you. To activate it, set the `normalize_carriage_return` argument to `True`.
+Since version 1.4, the `run()` function provides a way to handle it for you. To activate it, set the `normalize_carriage_return` argument to `True`. This might become the default value in a future version.
 
 If you use a previous version, you can reproduce this behavior easily by replacing the `\r\n` characters with `\n` on both `stdout` and `stderr`.
