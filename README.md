@@ -64,7 +64,7 @@ class CommandTest(unittest.TestCase):
     def test_ls_home(self):
         command_result = aurornis.run(["ls", "-l", "$HOME"], environment={"HOME": "/home/deuchnord"})
         # You can check quickly the command was successful:
-        self.assertTrue(command_result.is_successful())
+        self.assertTrue(command_result.successful)
         # Or if you expected a more specific return value:
         self.assertEqual(2, command_result.return_code) # ls returns 2 if the file does not exist
         

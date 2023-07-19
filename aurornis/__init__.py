@@ -27,9 +27,9 @@ def run(
     If you need to run the tests on both UNIX and Windows, it is recommended to set the `normalize_carriage_return` to True.
     This way, all the "\r\n" in standard output and standard error will be converted to "\n".
 
-    If the command returns a non-zero code, the is_successful() method returns false:
+    If the command returns a non-zero code, the successful property is false:
     >>> c = run(["python3", "-c", r"import sys; print('Oops, it didn\\'t work!', file=sys.stderr); exit(1)"], normalize_carriage_return=True)
-    >>> c.is_successful()
+    >>> c.successful
     False
 
     You can also check the execution time of your command.
@@ -67,7 +67,7 @@ def run(
     It is a list of strings, which are joined with the end-of-line character ("\n") at execution.
     Remember that the text written in standard input does not appear in the standard output.
     >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], stdin=["World"], normalize_carriage_return=True)
-    >>> c.is_successful()
+    >>> c.successful
     True
     >>> c.stdout
     'Who are you? Hello World!\\n'
@@ -75,7 +75,7 @@ def run(
     The number of elements given in `stdin` is not verified by Aurornis, it is up to you to verify that the command
     has the expected behavior.
     >>> c = run(["python3", "-c", "who = input('Who are you? '); print(f'Hello {who}!')"], normalize_carriage_return=True)
-    >>> c.is_successful()
+    >>> c.successful
     False
     >>> c.stdout
     'Who are you? '
