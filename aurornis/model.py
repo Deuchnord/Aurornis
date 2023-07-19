@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from deprecation import deprecated
+
 
 class CommandResult:
     """An object containing the result of a command"""
@@ -29,6 +31,15 @@ class CommandResult:
         return self._return_code
 
     @property
+    def successful(self) -> bool:
+        """Return true if and only if the command has been successful (i.e. its return code is zero)
+
+        This property is a facilitator for ``return_code == 0``.
+        It does not verify the command has actually correctly done its job, you still need to write your own tests to check it did.
+        """
+        return self.return_code == 0
+
+    @property
     def stdout(self) -> str:
         """The text that has been returned by the command in the standard output"""
         return self._stdout
@@ -56,13 +67,17 @@ class CommandResult:
         """
         return int(self._exec_time_microseconds / 1000)
 
+    @deprecated(
+        deprecated_in="1.5.0",
+        removed_in="2.0.0",
+        details="Use the `successful` property instead.",
+    )
     def is_successful(self) -> bool:
         """Return true if and only if the command has been successful (i.e. its return code is zero)
 
-        This is just a facilitator for `return_code == 0`.
-        This does not verify the command has actually correctly done its job, you still need to write your own tests to check this.
+        **Deprecated:** use the ``successful`` property instead.
         """
-        return self.return_code == 0
+        return self.successful
 
     def __repr__(self) -> str:
         return (
