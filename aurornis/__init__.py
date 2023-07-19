@@ -1,87 +1,15 @@
 #!/usr/bin/env python3
 
 import subprocess
+
 from sys import platform
 from os import environ
-
 from datetime import datetime
+
+from .model import CommandResult
 
 UNIX_ESC_CHAR = "\33"
 WINDOWS_ESC_CHAR = "\u001b"
-
-
-class CommandResult:
-    """An object containing the result of a command"""
-
-    def __init__(
-        self,
-        command: [str],
-        return_code: int,
-        stdout: str,
-        stderr: str,
-        exec_time_microseconds: int,
-    ):
-        self._command = command
-        self._return_code = return_code
-        self._stdout = stdout
-        self._stderr = stderr
-        self._exec_time_microseconds = exec_time_microseconds
-
-    @property
-    def command(self) -> [str]:
-        """The command that gave this result"""
-        return self._command
-
-    @property
-    def return_code(self) -> int:
-        """The code returned by the command. Usually a number between 0 and 255 (0 meaning successful)"""
-        return self._return_code
-
-    @property
-    def stdout(self) -> str:
-        """The text that has been returned by the command in the standard output"""
-        return self._stdout
-
-    @property
-    def stderr(self) -> str:
-        """The text that has been returned by the command in the error output"""
-        return self._stderr
-
-    @property
-    def exec_time_us(self) -> int:
-        """The time of execution of the command in microseconds
-
-        This can be useful if you have big constraints and want to guaranty the time execution.
-        If you don't need a so precise value, you can use the `exec_time_ms` property instead.
-        """
-        return self._exec_time_microseconds
-
-    @property
-    def exec_time_ms(self) -> int:
-        """The time of execution of the command in milliseconds
-
-        This can be useful if you have big constraints and want to guaranty the time execution.
-        If you need a more precise value, you can use the `exec_time_us` property instead.
-        """
-        return int(self._exec_time_microseconds / 1000)
-
-    def is_successful(self) -> bool:
-        """Return true if and only if the command has been successful (i.e. its return code is zero)
-
-        This is just a facilitator for `return_code == 0`.
-        This does not verify the command has actually correctly done its job, you still need to write your own tests to check this.
-        """
-        return self.return_code == 0
-
-    def __repr__(self) -> str:
-        return (
-            "<CommandResult"
-            f' command="{" ".join(self.command)}"'
-            f" return_code={self.return_code}"
-            f' stdout="{self.stdout}"'
-            f' stderr="{self.stderr}"'
-            ">"
-        )
 
 
 def run(
@@ -154,6 +82,45 @@ def run(
     >>> c.stderr
     'Traceback (most recent call last):\\n  File "<string>", line 1, in <module>\\nEOFError: EOF when reading a line\\n'
     """
+
+    def _remove_colors(from_text: str) -> str:
+        # Remove escape sequences.
+        # They have the "\e[(mode);(ten)(unit)m" form.
+        # On Windows, "\e" is replaced by the Esc character.
+        # See: https://man7.org/linux/man-pages/man5/terminal-colors.d.5.html
+
+        new_str = from_text
+
+        for escape_char in [UNIX_ESC_CHAR, WINDOWS_ESC_CHAR]:
+            for mode in range(6):
+                for ten in [3, 4]:
+                    for unit in range(0, 8):
+                        seq = f"{escape_char}[{mode};{ten}{unit}m"
+                        new_str = new_str.replace(seq, "")
+
+            new_str = new_str.replace(f"{escape_char}[0m", "")
+
+        return new_str
+
+    def _get_execution_environment(
+        user_environment: {str: str}, remove_colors: bool
+    ) -> {str: str}:
+        exec_env = {"LANG": "C"}
+
+        if platform == "win32":
+            exec_env["SystemRoot"] = environ.get("SystemRoot")
+        else:
+            exec_env["PATH"] = environ.get("PATH")
+
+        if user_environment is not None:
+            for key in user_environment:
+                exec_env[key] = user_environment[key]
+
+        if remove_colors:
+            exec_env["NO_COLOR"] = "1"
+
+        return exec_env
+
     if stdin is not None and len(stdin) > 0:
         input = "\n".join(stdin).encode("utf-8")
     else:
@@ -183,43 +150,3 @@ def run(
         stdout, stderr = _remove_colors(stdout), _remove_colors(stderr)
 
     return CommandResult(command, process.returncode, stdout, stderr, exec_time)
-
-
-def _remove_colors(from_text: str) -> str:
-    # Remove escape sequences.
-    # They have the "\e[(mode);(ten)(unit)m" form.
-    # On Windows, "\e" is replaced by the Esc character.
-    # See: https://man7.org/linux/man-pages/man5/terminal-colors.d.5.html
-
-    new_str = from_text
-
-    for escape_char in [UNIX_ESC_CHAR, WINDOWS_ESC_CHAR]:
-        for mode in range(6):
-            for ten in [3, 4]:
-                for unit in range(0, 8):
-                    seq = f"{escape_char}[{mode};{ten}{unit}m"
-                    new_str = new_str.replace(seq, "")
-
-        new_str = new_str.replace(f"{escape_char}[0m", "")
-
-    return new_str
-
-
-def _get_execution_environment(
-    user_environment: {str: str}, remove_colors: bool
-) -> {str: str}:
-    exec_env = {"LANG": "C"}
-
-    if platform == "win32":
-        exec_env["SystemRoot"] = environ.get("SystemRoot")
-    else:
-        exec_env["PATH"] = environ.get("PATH")
-
-    if user_environment is not None:
-        for key in user_environment:
-            exec_env[key] = user_environment[key]
-
-    if remove_colors:
-        exec_env["NO_COLOR"] = "1"
-
-    return exec_env
