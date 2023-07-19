@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import subprocess
+import warnings
 
 from sys import platform
 from os import environ
@@ -17,7 +18,7 @@ def run(
     environment: {str: str} = None,
     remove_colors: bool = False,
     stdin: [str] = None,
-    normalize_carriage_return: bool = False,
+    normalize_carriage_return: bool = None,
 ) -> CommandResult:
     """Execute the given command and return an object ready to check its result.
 
@@ -26,6 +27,7 @@ def run(
 
     If you need to run the tests on both UNIX and Windows, it is recommended to set the `normalize_carriage_return` to True.
     This way, all the "\r\n" in standard output and standard error will be converted to "\n".
+    **This will become the default behavior in version 2.0.**
 
     If the command returns a non-zero code, the successful property is false:
     >>> c = run(["python3", "-c", r"import sys; print('Oops, it didn\\'t work!', file=sys.stderr); exit(1)"], normalize_carriage_return=True)
@@ -139,6 +141,14 @@ def run(
 
     stdout = stdout.decode()
     stderr = stderr.decode()
+
+    if normalize_carriage_return is None:
+        normalize_carriage_return = False
+        warnings.warn(
+            "The normalize_carriage_return argument of the run() function the will default to True in version 2.0. "
+            "Set it to False manually to keep the current behavior.",
+            DeprecationWarning,
+        )
 
     if normalize_carriage_return:
         stdout = stdout.replace("\r\n", "\n")
