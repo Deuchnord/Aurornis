@@ -5,7 +5,7 @@ import warnings
 
 from sys import platform
 from os import environ
-from datetime import datetime
+from time import perf_counter_ns
 
 from .model import CommandResult
 
@@ -34,12 +34,10 @@ def run(
     >>> c.successful
     False
 
-    You can also check the execution time of your command.
-    The object provides two values to facilitate your tests, one in milliseconds:
-    >>> assert c.exec_time_ms < 1000
-
-    and one in microseconds:
-    >>> assert c.exec_time_us < 1000000
+    You can also check the execution time of your command thanks to three properties provided by the object:
+    >>> assert c.exec_time_ms < 1000 # in millisecond
+    >>> assert c.exec_time_us < 1000000 # in microseconds
+    >>> assert c.exec_time_ns < 1000000000 # in nanoseconds
 
     You can get the text returned to the standard output and error:
     >>> c.stdout
@@ -128,7 +126,7 @@ def run(
     else:
         input = None
 
-    start_time = datetime.now()
+    start_time = perf_counter_ns()
 
     process = subprocess.Popen(
         command,
@@ -138,6 +136,7 @@ def run(
         stdin=subprocess.PIPE,
     )
     stdout, stderr = process.communicate(input)
+    exec_time = perf_counter_ns() - start_time
 
     stdout = stdout.decode()
     stderr = stderr.decode()
@@ -153,8 +152,6 @@ def run(
     if normalize_carriage_return:
         stdout = stdout.replace("\r\n", "\n")
         stderr = stderr.replace("\r\n", "\n")
-
-    exec_time = (datetime.now() - start_time).microseconds
 
     if remove_colors:
         stdout, stderr = _remove_colors(stdout), _remove_colors(stderr)

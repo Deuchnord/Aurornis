@@ -12,13 +12,13 @@ class CommandResult:
         return_code: int,
         stdout: str,
         stderr: str,
-        exec_time_microseconds: int,
+        exec_time_nanoseconds: int,
     ):
         self._command = command
         self._return_code = return_code
         self._stdout = stdout
         self._stderr = stderr
-        self._exec_time_microseconds = exec_time_microseconds
+        self._exec_time_nanoseconds = exec_time_nanoseconds
 
     @property
     def command(self) -> [str]:
@@ -50,22 +50,34 @@ class CommandResult:
         return self._stderr
 
     @property
+    def exec_time_ns(self) -> int:
+        """The time of execution of the command in nanoseconds
+
+        This can be useful if you have huge constraints regarding the execution time.
+        Note that all systems don't support such precision.
+
+        If you don't need a so precise value, you can use the ``exec_time_us`` or ``exec_time_ms`` properties instead.
+        """
+        return self._exec_time_nanoseconds
+
+    @property
     def exec_time_us(self) -> int:
         """The time of execution of the command in microseconds
 
-        This can be useful if you have big constraints and want to guaranty the time execution.
-        If you don't need a so precise value, you can use the `exec_time_ms` property instead.
+        This can be useful if you have big constraints regarding the execution time.
+        If you need a more precise value, you can use the ``exec_time_ns`` property instead.
+        If you don't need a so precise value, you can use the ``exec_time_ms`` property instead.
         """
-        return self._exec_time_microseconds
+        return int(self.exec_time_ns / 1000)
 
     @property
     def exec_time_ms(self) -> int:
         """The time of execution of the command in milliseconds
 
-        This can be useful if you have big constraints and want to guaranty the time execution.
-        If you need a more precise value, you can use the `exec_time_us` property instead.
+        This can be useful if you have some constraints regarding the execution time.
+        If you need a more precise value, you can use the ``exec_time_us`` or ``exec_time_ms`` properties instead.
         """
-        return int(self._exec_time_microseconds / 1000)
+        return int(self.exec_time_us / 1000)
 
     @deprecated(
         deprecated_in="1.5.0",
