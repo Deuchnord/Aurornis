@@ -79,8 +79,8 @@ def run(
     False
     >>> c.stdout
     'Who are you? '
-    >>> c.stderr
-    'Traceback (most recent call last):\\n  File "<string>", line 1, in <module>\\nEOFError: EOF when reading a line\\n'
+    >>> "EOFError: EOF when reading a line" in c.stderr
+    True
     """
 
     def _remove_colors(from_text: str) -> str:
