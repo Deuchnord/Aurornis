@@ -1,11 +1,5 @@
 name: Tests
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
 jobs:
   doc-tests:
     runs-on: ${{ matrix.os }}
@@ -14,13 +8,53 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
-          - macos-latest
           - windows-latest
         python_version:
           - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
+          - '3.11'
+          - '3.12'
+          - '3.13'
+
+    name: Python ${{ matrix.python_version }} on ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python_version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python_version }}
+        architecture: x64
+
+    - name: Prepare environment
+      run: |
+        python3 -mpip install -U pip poetry
+        poetry install
+
+    - name: Run tests
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        poetry run coverage run tests.py
+
+    - name: Analyze coverage
+      run: |
+        poetry run coveralls --service=github
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_PARALLEL: true
+        COVERALLS_FLAG_NAME: "Py${{ matrix.python_version }}_${{ matrix.os }}"
+
+  doc-tests-macos:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+        python_version:
           - '3.11'
           - '3.12'
           - '3.13'
@@ -76,3 +110,9 @@ jobs:
           poetry run coveralls --finish --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
