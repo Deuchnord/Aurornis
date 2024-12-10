@@ -2,8 +2,9 @@
 
 import subprocess
 import warnings
+from platform import python_version
 
-from sys import platform
+from sys import platform, version_info
 from os import environ
 from time import perf_counter_ns
 
@@ -82,6 +83,14 @@ def run(
     >>> "EOFError: EOF when reading a line" in c.stderr
     True
     """
+
+    if version_info.major == 3 and version_info.minor < 11:
+        current_python_version = f"{version_info.major}.{version_info.minor}"
+        warnings.warn(
+            f"Support for Python {current_python_version} will be dropped in Aurornis 2.0."
+            f"Please upgrade to at least Python 3.11.",
+            DeprecationWarning,
+        )
 
     def _remove_colors(from_text: str) -> str:
         # Remove escape sequences.
